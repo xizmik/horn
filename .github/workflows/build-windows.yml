@@ -1,0 +1,83 @@
+name: Build HØRN Windows (.exe)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Версия релиза (например, v0.1.0)'
+        required: true
+        default: 'v0.1.0'
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Скачивание кода репозитория
+        uses: actions/checkout@v4
+
+      - name: Установка Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Установка Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Кэширование зависимостей Rust
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Установка npm-пакетов
+        run: npm install
+
+      - name: Генерация иконки HØRN (если не добавлена вручную)
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "src-tauri/icons/icon.ico")) {
+            Add-Type -AssemblyName System.Drawing
+            $bmp = New-Object System.Drawing.Bitmap(512, 512)
+            $g = [System.Drawing.Graphics]::FromImage($bmp)
+            $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
+            $g.Clear([System.Drawing.Color]::FromArgb(255, 11, 12, 15))
+            $pen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(255, 229, 231, 235), 28)
+            $g.DrawEllipse($pen, 128, 128, 256, 256)
+            $g.DrawLine($pen, 140, 372, 372, 140)
+            $bmp.Save("app-icon.png", [System.Drawing.Imaging.ImageFormat]::Png)
+            $g.Dispose()
+            $bmp.Dispose()
+            npx tauri icon app-icon.png
+          }
+
+      - name: Сборка Windows установщика (.exe)
+        run: npm run build
+
+      - name: Сохранение артефактов сборки
+        uses: actions/upload-artifact@v4
+        with:
+          name: HORN-Windows-Installer
+          path: |
+            src-tauri/target/release/bundle/nsis/*-setup.exe
+            src-tauri/target/release/horn.exe
+
+      - name: Публикация в GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version || github.ref_name }}
+          name: HØRN ${{ inputs.version || github.ref_name }}
+          body: |
+            Автоматическая сборка **HØRN** для Windows 10 / 11 (x64).
+            - `*-setup.exe` — полноценный установщик Windows.
+            - `horn.exe` — портативная версия без установки.
+          files: |
+            src-tauri/target/release/bundle/nsis/*-setup.exe
+            src-tauri/target/release/horn.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
