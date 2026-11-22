@@ -2,67 +2,90 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>HØRN Dynamic Island</title>
+  <title>HГRN Dynamic Island</title>
   <link rel="stylesheet" href="styles/tokens.css" />
   <link rel="stylesheet" href="styles/island.css" />
 </head>
 <body class="island-body">
   <div class="island-stage" id="island-stage">
     <div class="island-capsule state-compact theme-obsidian" id="island-capsule">
+      <!-- Compact -->
       <div class="island-view visible" id="view-compact">
         <div class="compact-left">
-          <span class="horn-dot"></span>
-          <span class="compact-brand">HØRN</span>
+          <img src="assets/app-icon.png" alt="HГRN" class="island-logo-sm" />
+          <span class="compact-brand">HГRN</span>
         </div>
         <span class="compact-clock" id="compact-clock">00:00</span>
       </div>
 
+      <!-- Activity -->
       <div class="island-view" id="view-activity">
         <div class="compact-left">
-          <div class="activity-bars">
-            <span></span><span></span><span></span><span></span>
-          </div>
-          <span class="activity-meta" id="activity-label">Фокус-режим</span>
+          <div class="activity-bars"><span></span><span></span><span></span><span></span></div>
+          <span class="activity-meta" id="activity-label">Р¤РѕРєСѓСЃ-С‚Р°Р№РјРµСЂ</span>
         </div>
         <span class="activity-meta" id="activity-value">00:00</span>
       </div>
 
+      <!-- Notification -->
       <div class="island-view notif-view" id="view-notification">
-        <div class="notif-icon">Ø</div>
+        <img src="assets/app-icon.png" alt="HГRN" class="notif-logo" />
         <div>
-          <div class="notif-title" id="notif-title">HØRN</div>
-          <div class="notif-sub" id="notif-sub">Системное уведомление</div>
+          <div class="notif-title" id="notif-title">HГRN</div>
+          <div class="notif-sub" id="notif-sub">РЎРёСЃС‚РµРјРЅРѕРµ СѓРІРµРґРѕРјР»РµРЅРёРµ</div>
         </div>
       </div>
 
+      <!-- Expanded -->
       <div class="island-view expanded-view" id="view-expanded">
         <div class="exp-top">
-          <span class="exp-title">HØRN • LIVE MONITOR</span>
-          <span class="exp-time" id="expanded-clock">00:00:00</span>
+          <div class="compact-left">
+            <img src="assets/app-icon.png" alt="HГRN" class="island-logo-sm" />
+            <span class="exp-title">HГRN вЂў LIVE</span>
+          </div>
+          <div style="text-align:right;">
+            <div class="exp-time" id="expanded-clock">00:00:00</div>
+            <div class="exp-date" id="expanded-date"></div>
+          </div>
         </div>
 
-        <div class="exp-metrics">
-          <div class="metric-box">
-            <div class="metric-label">CPU Load</div>
+        <div class="exp-metrics" id="exp-metrics-grid">
+          <div class="metric-box" id="box-cpu">
+            <div class="metric-label">CPU</div>
             <div class="metric-value" id="metric-cpu">0%</div>
-            <div class="metric-bar"><div class="metric-fill" id="bar-cpu" style="width: 0%"></div></div>
+            <div class="metric-bar"><div class="metric-fill" id="bar-cpu"></div></div>
           </div>
-          <div class="metric-box">
-            <div class="metric-label">Memory</div>
-            <div class="metric-value" id="metric-ram">0 / 0 GB</div>
-            <div class="metric-bar"><div class="metric-fill" id="bar-ram" style="width: 0%"></div></div>
+          <div class="metric-box" id="box-ram">
+            <div class="metric-label">RAM</div>
+            <div class="metric-value" id="metric-ram">0 GB</div>
+            <div class="metric-bar"><div class="metric-fill" id="bar-ram"></div></div>
+          </div>
+          <div class="metric-box" id="box-gpu">
+            <div class="metric-label">GPU</div>
+            <div class="metric-value" id="metric-gpu">N/A</div>
+          </div>
+          <div class="metric-box" id="box-temp">
+            <div class="metric-label">TEMP</div>
+            <div class="metric-value" id="metric-temp">N/A</div>
+          </div>
+          <div class="metric-box" id="box-bat">
+            <div class="metric-label">BATTERY</div>
+            <div class="metric-value" id="metric-bat">AC</div>
+          </div>
+          <div class="metric-box" id="box-net">
+            <div class="metric-label">NETWORK</div>
+            <div class="metric-value" id="metric-net" style="font-size:12px;">0 / 0 KB/s</div>
           </div>
         </div>
 
         <div class="exp-actions">
-          <button class="exp-btn" id="btn-toggle-focus">Фокус-таймер</button>
-          <button class="exp-btn" id="btn-open-horn">Открыть HØRN</button>
-          <button class="exp-btn" id="btn-collapse">Свернуть</button>
+          <button class="exp-btn" id="btn-toggle-focus">Р¤РѕРєСѓСЃ</button>
+          <button class="exp-btn" id="btn-open-horn">РћС‚РєСЂС‹С‚СЊ HГRN</button>
+          <button class="exp-btn" id="btn-collapse">РЎРІРµСЂРЅСѓС‚СЊ</button>
         </div>
       </div>
     </div>
   </div>
-
   <script type="module" src="js/island/controller.js"></script>
 </body>
 </html>

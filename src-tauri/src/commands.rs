@@ -1,23 +1,20 @@
 use crate::autostart::set_autostart;
-use crate::config::{config_path, persist_settings, HornSettings};
+use crate::config::{config_path, persist_settings, HornSettings, TaskbarSettings};
+use crate::icons::{
+    apply_png_icon_to_shortcut, list_desktop_shortcuts, pick_shortcut_file, restore_all_icons,
+    restore_shortcut_icon, DesktopShortcut,
+};
 use crate::island::{apply_island_window_layout, Hitbox, IslandRuntime};
+use crate::system_info::{detect_os_compatibility, OsCompatibility, SystemTelemetry, TelemetryCollector};
+use crate::taskbar::{apply_taskbar, restore_taskbar};
+use crate::wallpaper::{pick_image_files, read_file_as_data_url, set_desktop_wallpaper};
 use serde::Serialize;
-use std::sync::Mutex;
-use sysinfo::System;
+use std::sync::{Arc, Mutex};
 use tauri::{AppHandle, Emitter, Manager, State};
 
 pub struct AppState {
-    pub settings: Mutex<HornSettings>,
-    pub system: Mutex<System>,
-}
-
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SystemStats {
-    pub cpu_percent: f32,
-    pub ram_used_gb: f64,
-    pub ram_total_gb: f64,
-    pub ram_percent: f32,
+    pub settings: Arc<Mutex<HornSettings>>,
+    pub telemetry: Mutex<TelemetryCollector>,
 }
 
 #[derive(Clone, Serialize)]
@@ -34,87 +31,81 @@ pub fn get_settings(state: State<AppState>) -> HornSettings {
 }
 
 #[tauri::command]
-pub fn save_settings(
-    app: AppHandle,
-    state: State<AppState>,
-    settings: HornSettings,
-) -> Result<(), String> {
+pub fn save_settings(app: AppHandle, state: State<AppState>, settings: HornSettings) -> Result<(), String> {
     set_autostart(settings.autostart)?;
     persist_settings(&settings)?;
-
     if let Ok(mut guard) = state.settings.lock() {
         *guard = settings.clone();
     }
-
     apply_island_window_layout(&app, &settings.island);
     let _ = app.emit("settings-updated", &settings);
     Ok(())
 }
 
 #[tauri::command]
-pub fn update_island_hitbox(
-    runtime: State<IslandRuntime>,
-    x: f64,
-    y: f64,
-    width: f64,
-    height: f64,
-) {
+pub fn update_island_hitbox(runtime: State<IslandRuntime>, x: f64, y: f64, width: f64, height: f64) {
     if let Ok(mut hb) = runtime.hitbox.lock() {
         *hb = Hitbox { x, y, width, height };
     }
 }
 
 #[tauri::command]
-pub fn trigger_island_event(
-    app: AppHandle,
-    event_type: String,
-    title: String,
-    subtitle: String,
-) -> Result<(), String> {
-    let payload = IslandEventPayload {
-        event_type,
-        title,
-        subtitle,
-    };
-    app.emit_to("island", "island-event", payload)
+pub fn trigger_island_event(app: AppHandle, event_type: String, title: String, subtitle: String) -> Result<(), String> {
+    app.emit_to("island", "island-event", IslandEventPayload { event_type, title, subtitle })
         .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub fn get_system_stats(state: State<AppState>) -> SystemStats {
-    let Ok(mut sys) = state.system.lock() else {
-        return SystemStats {
-            cpu_percent: 0.0,
-            ram_used_gb: 0.0,
-            ram_total_gb: 0.0,
-            ram_percent: 0.0,
-        };
-    };
-
-    sys.refresh_cpu_usage();
-    sys.refresh_memory();
-
-    let cpu = sys.global_cpu_usage();
-    let total = sys.total_memory() as f64 / 1_073_741_824.0;
-    let used = sys.used_memory() as f64 / 1_073_741_824.0;
-    let pct = if total > 0.0 {
-        ((used / total) * 100.0) as f32
-    } else {
-        0.0
-    };
-
-    SystemStats {
-        cpu_percent: (cpu * 10.0).round() / 10.0,
-        ram_used_gb: (used * 10.0).round() / 10.0,
-        ram_total_gb: (total * 10.0).round() / 10.0,
-        ram_percent: (pct * 10.0).round() / 10.0,
+pub fn get_system_telemetry(state: State<AppState>) -> SystemTelemetry {
+    match state.telemetry.lock() {
+        Ok(mut collector) => collector.collect(),
+        Err(_) => SystemTelemetry {
+            cpu_percent: 0.0, ram_used_gb: 0.0, ram_total_gb: 0.0, ram_percent: 0.0,
+            gpu_percent: None, gpu_name: None, temperature_c: None,
+            battery_percent: None, battery_charging: false, net_down_kbps: 0.0, net_up_kbps: 0.0,
+        },
     }
 }
 
 #[tauri::command]
-pub fn get_config_file_path() -> String {
-    config_path().to_string_lossy().to_string()
+pub fn get_os_compatibility() -> OsCompatibility { detect_os_compatibility() }
+
+#[tauri::command]
+pub fn apply_taskbar_settings(settings: TaskbarSettings) -> Result<String, String> { apply_taskbar(&settings) }
+
+#[tauri::command]
+pub fn restore_taskbar_defaults() -> Result<String, String> { restore_taskbar() }
+
+#[tauri::command]
+pub fn pick_wallpapers() -> Vec<String> { pick_image_files() }
+
+#[tauri::command]
+pub fn read_image_data_url(path: String) -> Result<String, String> { read_file_as_data_url(&path) }
+
+#[tauri::command]
+pub fn apply_wallpaper_now(path: String, fit_mode: String) -> Result<(), String> { set_desktop_wallpaper(&path, &fit_mode) }
+
+#[tauri::command]
+pub fn get_desktop_shortcuts() -> Vec<DesktopShortcut> { list_desktop_shortcuts() }
+
+#[tauri::command]
+pub fn browse_shortcut_file() -> Option<String> { pick_shortcut_file() }
+
+#[tauri::command]
+pub fn apply_icon_to_shortcut(shortcut_path: String, png_base64: String) -> Result<String, String> {
+    apply_png_icon_to_shortcut(&shortcut_path, &png_base64)
 }
+
+#[tauri::command]
+pub fn restore_icon_for_shortcut(shortcut_path: String) -> Result<String, String> {
+    restore_shortcut_icon(&shortcut_path)
+}
+
+#[tauri::command]
+pub fn restore_all_shortcut_icons() -> Result<String, String> { restore_all_icons() }
+
+#[tauri::command]
+pub fn get_config_file_path() -> String { config_path().to_string_lossy().to_string() }
 
 #[tauri::command]
 pub fn show_main_window(app: AppHandle) {
@@ -133,6 +124,4 @@ pub fn hide_main_window(app: AppHandle) {
 }
 
 #[tauri::command]
-pub fn quit_app(app: AppHandle) {
-    app.exit(0);
-}
+pub fn quit_app(app: AppHandle) { app.exit(0); }

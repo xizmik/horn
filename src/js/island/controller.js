@@ -12,6 +12,7 @@ let currentState = "compact";
 let notifTimer = null;
 let focusRunning = false;
 let focusSeconds = 0;
+let activeModules = {};
 
 function syncHitbox() {
   const rect = capsule.getBoundingClientRect();
@@ -22,11 +23,7 @@ function setState(nextState) {
   currentState = nextState;
   capsule.classList.remove("state-compact", "state-activity", "state-notification", "state-expanded");
   capsule.classList.add(`state-${nextState}`);
-
-  Object.entries(views).forEach(([name, el]) => {
-    el.classList.toggle("visible", name === nextState);
-  });
-
+  Object.entries(views).forEach(([name, el]) => el.classList.toggle("visible", name === nextState));
   syncHitbox();
   setTimeout(syncHitbox, 180);
   setTimeout(syncHitbox, 420);
@@ -34,25 +31,45 @@ function setState(nextState) {
 
 function applySettings(settings) {
   const isl = settings.island;
-  const speedMap = { slow: "520ms", normal: "360ms", fast: "200ms" };
-
-  document.documentElement.style.setProperty("--island-scale", String(isl.scale));
-  document.documentElement.style.setProperty("--island-opacity", String(isl.opacity));
-  document.documentElement.style.setProperty("--island-speed", speedMap[isl.animationSpeed] || "360ms");
+  activeModules = isl.modules || {};
+  const speedMap = { slow: "500ms", normal: "340ms", fast: "180ms" };
+  const root = document.documentElement.style;
+  root.setProperty("--island-scale", String(isl.scale));
+  root.setProperty("--island-opacity", String(isl.opacity));
+  root.setProperty("--island-speed", speedMap[isl.animationSpeed] || "340ms");
+  root.setProperty("--compact-w", `${isl.compactWidth || 224}px`);
+  root.setProperty("--compact-h", `${isl.compactHeight || 38}px`);
+  root.setProperty("--expanded-w", `${isl.expandedWidth || 440}px`);
+  root.setProperty("--expanded-h", `${isl.expandedHeight || 256}px`);
+  root.setProperty("--island-radius", `${isl.borderRadius || 26}px`);
 
   capsule.classList.toggle("no-anim", !isl.animationsEnabled);
   capsule.classList.remove("theme-obsidian", "theme-graphite", "theme-steel");
   capsule.classList.add(`theme-${isl.theme}`);
 
-  setTimeout(syncHitbox, 100);
+  document.getElementById("box-cpu").classList.toggle("hidden", activeModules.cpu === false);
+  document.getElementById("box-ram").classList.toggle("hidden", activeModules.ram === false);
+  document.getElementById("box-gpu").classList.toggle("hidden", activeModules.gpu === false);
+  document.getElementById("box-temp").classList.toggle("hidden", activeModules.temperature === false);
+  document.getElementById("box-bat").classList.toggle("hidden", activeModules.battery === false);
+  document.getElementById("box-net").classList.toggle("hidden", activeModules.network === false);
+  document.getElementById("btn-toggle-focus").style.display = activeModules.focusTimer === false ? "none" : "";
+
+  setTimeout(syncHitbox, 120);
 }
 
 function updateClocks() {
   const now = new Date();
-  const hhmm = now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
-  const hhmmss = now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-  document.getElementById("compact-clock").textContent = hhmm;
-  document.getElementById("expanded-clock").textContent = hhmmss;
+  const showClock = activeModules.clockCalendar !== false;
+  document.getElementById("compact-clock").textContent = showClock
+    ? now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })
+    : "";
+  document.getElementById("expanded-clock").textContent = showClock
+    ? now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+    : "";
+  document.getElementById("expanded-date").textContent = showClock
+    ? now.toLocaleDateString("ru-RU", { weekday: "short", day: "numeric", month: "short" })
+    : "";
 
   if (focusRunning) {
     focusSeconds += 1;
@@ -62,43 +79,40 @@ function updateClocks() {
   }
 }
 
-async function pollMetrics() {
+async function pollTelemetry() {
   if (currentState !== "expanded") return;
   try {
-    const stats = await api.getSystemStats();
-    document.getElementById("metric-cpu").textContent = `${stats.cpuPercent}%`;
-    document.getElementById("bar-cpu").style.width = `${Math.min(100, stats.cpuPercent)}%`;
-    document.getElementById("metric-ram").textContent = `${stats.ramUsedGb} / ${stats.ramTotalGb} GB`;
-    document.getElementById("bar-ram").style.width = `${Math.min(100, stats.ramPercent)}%`;
-  } catch (e) {
-    console.error(e);
-  }
+    const t = await api.getSystemTelemetry();
+    document.getElementById("metric-cpu").textContent = `${t.cpuPercent}%`;
+    document.getElementById("bar-cpu").style.width = `${Math.min(100, t.cpuPercent)}%`;
+    document.getElementById("metric-ram").textContent = `${t.ramUsedGb}/${t.ramTotalGb}G`;
+    document.getElementById("bar-ram").style.width = `${Math.min(100, t.ramPercent)}%`;
+    document.getElementById("metric-gpu").textContent = t.gpuPercent != null ? `${t.gpuPercent}%` : "N/A";
+    document.getElementById("metric-temp").textContent = t.temperatureC != null ? `${t.temperatureC}В°C` : "N/A";
+    document.getElementById("metric-bat").textContent =
+      t.batteryPercent != null ? `${t.batteryPercent}%${t.batteryCharging ? " вљЎ" : ""}` : "AC";
+    document.getElementById("metric-net").textContent = `в†“${t.netDownKbps} в†‘${t.netUpKbps}`;
+  } catch (e) {}
 }
 
 capsule.addEventListener("click", (e) => {
   if (e.target.closest("button")) return;
-  if (currentState === "expanded") {
-    setState(focusRunning ? "activity" : "compact");
-  } else {
-    setState("expanded");
-    pollMetrics();
-  }
+  if (currentState === "expanded") setState(focusRunning ? "activity" : "compact");
+  else { setState("expanded"); pollTelemetry(); }
 });
 
-document.getElementById("btn-toggle-focus").addEventListener("click", () => {
+document.getElementById("btn-toggle-focus").onclick = () => {
   focusRunning = !focusRunning;
   if (focusRunning) {
     focusSeconds = 0;
-    document.getElementById("activity-label").textContent = "Фокус-таймер";
+    document.getElementById("activity-label").textContent = "Р¤РѕРєСѓСЃ-С‚Р°Р№РјРµСЂ";
     document.getElementById("activity-value").textContent = "00:00";
     setState("activity");
-  } else {
-    setState("compact");
-  }
-});
+  } else setState("compact");
+};
 
-document.getElementById("btn-open-horn").addEventListener("click", () => api.showMainWindow());
-document.getElementById("btn-collapse").addEventListener("click", () => setState(focusRunning ? "activity" : "compact"));
+document.getElementById("btn-open-horn").onclick = () => api.showMainWindow();
+document.getElementById("btn-collapse").onclick = () => setState(focusRunning ? "activity" : "compact");
 
 async function initIsland() {
   const settings = await api.getSettings();
@@ -107,28 +121,25 @@ async function initIsland() {
   syncHitbox();
 
   setInterval(updateClocks, 1000);
-  setInterval(pollMetrics, 1500);
+  setInterval(pollTelemetry, 1500);
 
   await api.onSettingsUpdated(applySettings);
   await api.onIslandEvent((evt) => {
     if (notifTimer) clearTimeout(notifTimer);
-
     if (evt.eventType === "notification") {
-      document.getElementById("notif-title").textContent = evt.title || "HØRN";
+      if (activeModules.notifications === false) return;
+      document.getElementById("notif-title").textContent = evt.title || "HГRN";
       document.getElementById("notif-sub").textContent = evt.subtitle || "";
       setState("notification");
-      notifTimer = setTimeout(() => setState(focusRunning ? "activity" : "compact"), 3600);
+      notifTimer = setTimeout(() => setState(focusRunning ? "activity" : "compact"), 3800);
     } else if (evt.eventType === "activity") {
-      focusRunning = true;
-      focusSeconds = 0;
-      document.getElementById("activity-label").textContent = evt.title || "Активность";
+      focusRunning = true; focusSeconds = 0;
+      document.getElementById("activity-label").textContent = evt.title || "Р¤РѕРєСѓСЃ-С‚Р°Р№РјРµСЂ";
       setState("activity");
     } else if (evt.eventType === "expanded") {
-      setState("expanded");
-      pollMetrics();
+      setState("expanded"); pollTelemetry();
     } else {
-      focusRunning = false;
-      setState("compact");
+      focusRunning = false; setState("compact");
     }
   });
 }

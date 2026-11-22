@@ -15,9 +15,9 @@ pub struct Hitbox {
 impl Default for Hitbox {
     fn default() -> Self {
         Self {
-            x: 130.0,
-            y: 6.0,
-            width: 220.0,
+            x: 170.0,
+            y: 8.0,
+            width: 240.0,
             height: 44.0,
         }
     }
@@ -52,7 +52,7 @@ pub fn apply_island_window_layout(app: &AppHandle, settings: &IslandSettings) {
         let mon_pos = monitor.position();
         let scale = monitor.scale_factor();
 
-        let win_width_phys = (480.0 * scale) as i32;
+        let win_width_phys = (580.0 * scale) as i32;
         let center_x = mon_pos.x + (mon_size.width as i32 - win_width_phys) / 2
             + (settings.offset_x as f64 * scale) as i32;
         let top_y = mon_pos.y + (settings.offset_y as f64 * scale) as i32;
@@ -65,7 +65,7 @@ pub fn start_cursor_hit_tracker(app: AppHandle, hitbox_ref: Arc<Mutex<Hitbox>>) 
     thread::spawn(move || {
         let mut ignoring = false;
         loop {
-            thread::sleep(Duration::from_millis(25));
+            thread::sleep(Duration::from_millis(20));
 
             let Some(window) = app.get_webview_window("island") else {
                 continue;
@@ -81,7 +81,7 @@ pub fn start_cursor_hit_tracker(app: AppHandle, hitbox_ref: Arc<Mutex<Hitbox>>) 
             let local_x = (cursor.x - win_pos.x as f64) / scale;
             let local_y = (cursor.y - win_pos.y as f64) / scale;
 
-            let pad = 8.0;
+            let pad = 10.0;
             let inside = if let Ok(hb) = hitbox_ref.lock() {
                 local_x >= (hb.x - pad)
                     && local_x <= (hb.x + hb.width + pad)
