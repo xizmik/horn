@@ -19,15 +19,53 @@ pub struct IslandModules {
 impl Default for IslandModules {
     fn default() -> Self {
         Self {
-            cpu: true,
-            ram: true,
-            gpu: true,
-            temperature: true,
-            battery: true,
-            network: true,
-            clock_calendar: true,
-            focus_timer: true,
-            notifications: true,
+            cpu: true, ram: true, gpu: true, temperature: true, battery: true,
+            network: true, clock_calendar: true, focus_timer: true, notifications: true,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CustomWidget {
+    pub id: String,
+    pub widget_type: String, // "cpu"|"ram"|"gpu"|"temp"|"battery"|"network"|"weather"|"clock"|"music"|"storage"|"focus"|"notifications"
+    pub span: u8,            // 1 | 2 | 3
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CustomPreset {
+    pub id: String,
+    pub name: String,
+    pub widgets: Vec<CustomWidget>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CalendarEvent {
+    pub id: String,
+    pub title: String,
+    pub time: String,
+    pub date: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WeatherConfig {
+    pub city: String,
+    pub lat: f64,
+    pub lon: f64,
+    pub refresh_minutes: u32,
+}
+
+impl Default for WeatherConfig {
+    fn default() -> Self {
+        Self {
+            city: "Kyiv".into(),
+            lat: 50.4501,
+            lon: 30.5234,
+            refresh_minutes: 15,
         }
     }
 }
@@ -37,6 +75,8 @@ impl Default for IslandModules {
 pub struct IslandSettings {
     pub enabled: bool,
     pub scale: f64,
+    #[serde(default = "default_mode")]
+    pub active_mode: String, // "system"|"notifications"|"weather"|"calendar"|"network"|"music"|"storage"|"focus"|"custom"
     #[serde(default = "default_compact_w")]
     pub compact_width: u32,
     #[serde(default = "default_compact_h")]
@@ -55,13 +95,33 @@ pub struct IslandSettings {
     pub theme: String,
     #[serde(default)]
     pub modules: IslandModules,
+    #[serde(default = "default_focus_min")]
+    pub focus_minutes: u32,
+    #[serde(default)]
+    pub weather: WeatherConfig,
+    #[serde(default)]
+    pub calendar_events: Vec<CalendarEvent>,
+    #[serde(default = "default_custom_widgets")]
+    pub custom_widgets: Vec<CustomWidget>,
+    #[serde(default)]
+    pub custom_presets: Vec<CustomPreset>,
 }
 
-fn default_compact_w() -> u32 { 224 }
+fn default_mode() -> String { "system".into() }
+fn default_compact_w() -> u32 { 236 }
 fn default_compact_h() -> u32 { 38 }
-fn default_expanded_w() -> u32 { 440 }
-fn default_expanded_h() -> u32 { 256 }
+fn default_expanded_w() -> u32 { 460 }
+fn default_expanded_h() -> u32 { 276 }
 fn default_radius() -> u32 { 26 }
+fn default_focus_min() -> u32 { 25 }
+fn default_custom_widgets() -> Vec<CustomWidget> {
+    vec![
+        CustomWidget { id: "w1".into(), widget_type: "cpu".into(), span: 1 },
+        CustomWidget { id: "w2".into(), widget_type: "ram".into(), span: 1 },
+        CustomWidget { id: "w3".into(), widget_type: "weather".into(), span: 1 },
+        CustomWidget { id: "w4".into(), widget_type: "music".into(), span: 3 },
+    ]
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -81,16 +141,9 @@ pub struct TaskbarSettings {
 impl Default for TaskbarSettings {
     fn default() -> Self {
         Self {
-            preset: "default".into(),
-            effect: "normal".into(),
-            color_hex: "#0d0f14".into(),
-            opacity: 190,
-            alignment: "center".into(),
-            icon_size: "medium".into(),
-            position: "bottom".into(),
-            show_search: true,
-            show_task_view: true,
-            show_widgets: false,
+            preset: "default".into(), effect: "normal".into(), color_hex: "#0d0f14".into(),
+            opacity: 190, alignment: "center".into(), icon_size: "medium".into(),
+            position: "bottom".into(), show_search: true, show_task_view: true, show_widgets: false,
         }
     }
 }
@@ -120,12 +173,8 @@ pub struct WallpaperSettings {
 impl Default for WallpaperSettings {
     fn default() -> Self {
         Self {
-            fit_mode: "fill".into(),
-            active_path: None,
-            slideshow_enabled: false,
-            slideshow_interval_sec: 300,
-            slideshow_playlist: Vec::new(),
-            items: Vec::new(),
+            fit_mode: "fill".into(), active_path: None, slideshow_enabled: false,
+            slideshow_interval_sec: 300, slideshow_playlist: Vec::new(), items: Vec::new(),
         }
     }
 }
@@ -158,30 +207,20 @@ impl Default for HornSettings {
         Self {
             autostart: false,
             island: IslandSettings {
-                enabled: true,
-                scale: 1.0,
-                compact_width: 224,
-                compact_height: 38,
-                expanded_width: 440,
-                expanded_height: 256,
-                border_radius: 26,
-                offset_x: 0,
-                offset_y: 12,
-                animations_enabled: true,
-                animation_speed: "normal".into(),
-                opacity: 0.96,
-                theme: "obsidian".into(),
-                modules: IslandModules::default(),
+                enabled: true, scale: 1.0, active_mode: default_mode(),
+                compact_width: default_compact_w(), compact_height: default_compact_h(),
+                expanded_width: default_expanded_w(), expanded_height: default_expanded_h(),
+                border_radius: default_radius(), offset_x: 0, offset_y: 12,
+                animations_enabled: true, animation_speed: "normal".into(),
+                opacity: 0.96, theme: "obsidian".into(), modules: IslandModules::default(),
+                focus_minutes: default_focus_min(), weather: WeatherConfig::default(),
+                calendar_events: Vec::new(), custom_widgets: default_custom_widgets(),
+                custom_presets: Vec::new(),
             },
             taskbar: TaskbarSettings::default(),
             wallpaper: WallpaperSettings::default(),
             atmosphere: AtmosphereSettings {
-                snow: false,
-                rain: false,
-                fog: false,
-                particles: false,
-                stars: false,
-                ambient_light: false,
+                snow: false, rain: false, fog: false, particles: false, stars: false, ambient_light: false,
             },
         }
     }

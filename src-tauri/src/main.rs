@@ -5,6 +5,7 @@ mod commands;
 mod config;
 mod icons;
 mod island;
+mod media;
 mod system_info;
 mod taskbar;
 mod wallpaper;
@@ -37,21 +38,24 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            commands::get_brand_logo,
             commands::get_settings,
             commands::save_settings,
             commands::update_island_hitbox,
             commands::trigger_island_event,
             commands::get_system_telemetry,
+            commands::get_media_info,
+            commands::media_control,
             commands::get_os_compatibility,
             commands::apply_taskbar_settings,
             commands::restore_taskbar_defaults,
             commands::pick_wallpapers,
             commands::read_image_data_url,
             commands::apply_wallpaper_now,
-            commands::get_desktop_shortcuts,
+            commands::get_icon_targets,
             commands::browse_shortcut_file,
-            commands::apply_icon_to_shortcut,
-            commands::restore_icon_for_shortcut,
+            commands::apply_icon_to_target_cmd,
+            commands::restore_target_icon_cmd,
             commands::restore_all_shortcut_icons,
             commands::get_config_file_path,
             commands::show_main_window,
