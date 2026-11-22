@@ -1,8 +1,8 @@
 [package]
 name = "horn"
 version = "0.2.0"
-description = "HГRN вЂ” Windows Visual Customization Platform"
-authors = ["HГRN Team"]
+description = "HØRN — Windows Visual Customization Platform"
+authors = ["HØRN Team"]
 edition = "2021"
 
 [build-dependencies]

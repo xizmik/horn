@@ -24,7 +24,7 @@ function updateSidebarStatus() {
   const text = document.getElementById("island-status-text");
   const enabled = state.settings?.island?.enabled;
   dot.style.opacity = enabled ? "1" : "0.25";
-  text.textContent = enabled ? "Dynamic Island Р°РєС‚РёРІРµРЅ" : "Dynamic Island РѕС‚РєР»СЋС‡С‘РЅ";
+  text.textContent = enabled ? "Dynamic Island активен" : "Dynamic Island отключён";
 }
 
 function renderNav() {
@@ -48,7 +48,7 @@ async function updateSettings(updater) {
   try {
     await api.saveSettings(next);
   } catch (err) {
-    showToast("РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ: " + err);
+    showToast("Ошибка сохранения: " + err);
   }
 }
 

@@ -5,21 +5,21 @@ export function renderTaskbar(root, { settings, osCompat, updateSettings }) {
 
   root.innerHTML = `
     <div class="page-header">
-      <div class="page-kicker">TASKBAR STUDIO вЂў DWM ENGINE</div>
+      <div class="page-kicker">TASKBAR STUDIO • DWM ENGINE</div>
       <h1 class="page-title">Taskbar Studio</h1>
-      <p class="page-subtitle">РќР°СЃС‚РѕСЏС‰РµРµ СѓРїСЂР°РІР»РµРЅРёРµ РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊСЋ, СЂР°Р·РјС‹С‚РёРµРј Рё СЌР»РµРјРµРЅС‚Р°РјРё СЃРёСЃС‚РµРјРЅРѕР№ РїР°РЅРµР»Рё Р·Р°РґР°С‡ Windows.</p>
+      <p class="page-subtitle">Настоящее управление прозрачностью, размытием и элементами системной панели задач Windows.</p>
     </div>
 
     <div class="info-banner">
-      РћРїСЂРµРґРµР»РµРЅР° СЃРёСЃС‚РµРјР°: <strong>${osCompat.osLabel}</strong>.
+      Определена система: <strong>${osCompat.osLabel}</strong>.
       ${osCompat.isWindows11
-        ? "РџРѕРґРґРµСЂР¶РёРІР°СЋС‚СЃСЏ РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊ/Blur/Acrylic, РІС‹СЂР°РІРЅРёРІР°РЅРёРµ Рё СЌР»РµРјРµРЅС‚С‹ РїР°РЅРµР»Рё. РР·РјРµРЅРµРЅРёРµ РїРѕР»РѕР¶РµРЅРёСЏ Рё СЂР°Р·РјРµСЂР° РёРєРѕРЅРѕРє РѕРіСЂР°РЅРёС‡РµРЅРѕ СЃР°РјРѕР№ Windows 11."
-        : "РџРѕРґРґРµСЂР¶РёРІР°СЋС‚СЃСЏ РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊ/Blur/Acrylic, СЂР°Р·РјРµСЂ РёРєРѕРЅРѕРє Рё СЃРёСЃС‚РµРјРЅС‹Рµ СЌР»РµРјРµРЅС‚С‹."}
+        ? "Поддерживаются прозрачность/Blur/Acrylic, выравнивание и элементы панели. Изменение положения и размера иконок ограничено самой Windows 11."
+        : "Поддерживаются прозрачность/Blur/Acrylic, размер иконок и системные элементы."}
     </div>
 
     <div class="section-stack">
       <div class="card">
-        <div class="card-title" style="margin-bottom:10px;">РџСЂРµРґРїСЂРѕСЃРјРѕС‚СЂ РїР°РЅРµР»Рё Р·Р°РґР°С‡</div>
+        <div class="card-title" style="margin-bottom:10px;">Предпросмотр панели задач</div>
         <div class="taskbar-preview" id="tb-preview">
           <div class="tb-icon"></div><div class="tb-icon"></div><div class="tb-icon"></div><div class="tb-icon"></div>
         </div>
@@ -27,15 +27,15 @@ export function renderTaskbar(root, { settings, osCompat, updateSettings }) {
 
       <div class="card">
         <div class="setting-row">
-          <div><div class="setting-label">Р­С„С„РµРєС‚ РїРѕРІРµСЂС…РЅРѕСЃС‚Рё</div><div class="setting-hint">SetWindowCompositionAttribute (DWM)</div></div>
+          <div><div class="setting-label">Эффект поверхности</div><div class="setting-hint">SetWindowCompositionAttribute (DWM)</div></div>
           <div class="segmented" id="tb-effect">
-            ${[["normal","РЎС‚Р°РЅРґР°СЂС‚"],["transparent","РџСЂРѕР·СЂР°С‡РЅС‹Р№"],["blur","Blur"],["acrylic","Acrylic"]].map(([v,l]) =>
+            ${[["normal","Стандарт"],["transparent","Прозрачный"],["blur","Blur"],["acrylic","Acrylic"]].map(([v,l]) =>
               `<button class="seg-btn ${tb.effect === v ? "active" : ""}" data-val="${v}">${l}</button>`
             ).join("")}
           </div>
         </div>
         <div class="setting-row">
-          <div><div class="setting-label">Р¦РІРµС‚ С‚РѕРЅРёСЂРѕРІР°РЅРёСЏ Рё РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊ</div></div>
+          <div><div class="setting-label">Цвет тонирования и прозрачность</div></div>
           <div style="display:flex;align-items:center;gap:12px;">
             <input type="color" id="tb-color" value="${tb.colorHex}"/>
             <input type="range" id="tb-op" min="0" max="255" value="${tb.opacity}"/>
@@ -44,27 +44,27 @@ export function renderTaskbar(root, { settings, osCompat, updateSettings }) {
         </div>
         ${osCompat.supportsAlignment ? `
         <div class="setting-row">
-          <div><div class="setting-label">Р’С‹СЂР°РІРЅРёРІР°РЅРёРµ РёРєРѕРЅРѕРє (Windows 11)</div></div>
+          <div><div class="setting-label">Выравнивание иконок (Windows 11)</div></div>
           <div class="segmented" id="tb-align">
-            <button class="seg-btn ${tb.alignment === "left" ? "active" : ""}" data-val="left">РЎР»РµРІР°</button>
-            <button class="seg-btn ${tb.alignment === "center" ? "active" : ""}" data-val="center">РџРѕ С†РµРЅС‚СЂСѓ</button>
+            <button class="seg-btn ${tb.alignment === "left" ? "active" : ""}" data-val="left">Слева</button>
+            <button class="seg-btn ${tb.alignment === "center" ? "active" : ""}" data-val="center">По центру</button>
           </div>
         </div>` : ""}
         <div class="setting-row">
-          <div><div class="setting-label">РљРЅРѕРїРєР° РїРѕРёСЃРєР°</div></div>
+          <div><div class="setting-label">Кнопка поиска</div></div>
           <label class="toggle"><input type="checkbox" id="tb-search" ${tb.showSearch ? "checked" : ""}/><span class="toggle-track"></span></label>
         </div>
         <div class="setting-row">
-          <div><div class="setting-label">РџСЂРµРґСЃС‚Р°РІР»РµРЅРёРµ Р·Р°РґР°С‡ (Task View)</div></div>
+          <div><div class="setting-label">Представление задач (Task View)</div></div>
           <label class="toggle"><input type="checkbox" id="tb-tv" ${tb.showTaskView ? "checked" : ""}/><span class="toggle-track"></span></label>
         </div>
         <div class="setting-row">
-          <div><div class="setting-label">Р’РёРґР¶РµС‚С‹</div></div>
+          <div><div class="setting-label">Виджеты</div></div>
           <label class="toggle"><input type="checkbox" id="tb-wid" ${tb.showWidgets ? "checked" : ""}/><span class="toggle-track"></span></label>
         </div>
         <div class="btn-row">
-          <button class="btn btn-primary" id="btn-tb-apply">РџСЂРёРјРµРЅРёС‚СЊ Рє Windows</button>
-          <button class="btn" id="btn-tb-restore">Р’РѕСЃСЃС‚Р°РЅРѕРІРёС‚СЊ РёСЃС…РѕРґРЅРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ</button>
+          <button class="btn btn-primary" id="btn-tb-apply">Применить к Windows</button>
+          <button class="btn" id="btn-tb-restore">Восстановить исходное состояние</button>
         </div>
       </div>
     </div>
@@ -100,10 +100,10 @@ export function renderTaskbar(root, { settings, osCompat, updateSettings }) {
 
   root.querySelector("#btn-tb-apply").onclick = async () => {
     try { showToast(await api.applyTaskbarSettings(settings.taskbar)); }
-    catch (err) { showToast("РћС€РёР±РєР°: " + err); }
+    catch (err) { showToast("Ошибка: " + err); }
   };
   root.querySelector("#btn-tb-restore").onclick = async () => {
     try { showToast(await api.restoreTaskbarDefaults()); }
-    catch (err) { showToast("РћС€РёР±РєР°: " + err); }
+    catch (err) { showToast("Ошибка: " + err); }
   };
 }

@@ -11,7 +11,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "HГRN",
+        "title": "HØRN",
         "url": "index.html",
         "width": 1180,
         "height": 760,
@@ -25,7 +25,7 @@
       },
       {
         "label": "island",
-        "title": "HГRN Dynamic Island",
+        "title": "HØRN Dynamic Island",
         "url": "island.html",
         "width": 580,
         "height": 340,

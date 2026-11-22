@@ -88,10 +88,10 @@ async function pollTelemetry() {
     document.getElementById("metric-ram").textContent = `${t.ramUsedGb}/${t.ramTotalGb}G`;
     document.getElementById("bar-ram").style.width = `${Math.min(100, t.ramPercent)}%`;
     document.getElementById("metric-gpu").textContent = t.gpuPercent != null ? `${t.gpuPercent}%` : "N/A";
-    document.getElementById("metric-temp").textContent = t.temperatureC != null ? `${t.temperatureC}В°C` : "N/A";
+    document.getElementById("metric-temp").textContent = t.temperatureC != null ? `${t.temperatureC}°C` : "N/A";
     document.getElementById("metric-bat").textContent =
-      t.batteryPercent != null ? `${t.batteryPercent}%${t.batteryCharging ? " вљЎ" : ""}` : "AC";
-    document.getElementById("metric-net").textContent = `в†“${t.netDownKbps} в†‘${t.netUpKbps}`;
+      t.batteryPercent != null ? `${t.batteryPercent}%${t.batteryCharging ? " ⚡" : ""}` : "AC";
+    document.getElementById("metric-net").textContent = `↓${t.netDownKbps} ↑${t.netUpKbps}`;
   } catch (e) {}
 }
 
@@ -105,7 +105,7 @@ document.getElementById("btn-toggle-focus").onclick = () => {
   focusRunning = !focusRunning;
   if (focusRunning) {
     focusSeconds = 0;
-    document.getElementById("activity-label").textContent = "Р¤РѕРєСѓСЃ-С‚Р°Р№РјРµСЂ";
+    document.getElementById("activity-label").textContent = "Фокус-таймер";
     document.getElementById("activity-value").textContent = "00:00";
     setState("activity");
   } else setState("compact");
@@ -128,13 +128,13 @@ async function initIsland() {
     if (notifTimer) clearTimeout(notifTimer);
     if (evt.eventType === "notification") {
       if (activeModules.notifications === false) return;
-      document.getElementById("notif-title").textContent = evt.title || "HГRN";
+      document.getElementById("notif-title").textContent = evt.title || "HØRN";
       document.getElementById("notif-sub").textContent = evt.subtitle || "";
       setState("notification");
       notifTimer = setTimeout(() => setState(focusRunning ? "activity" : "compact"), 3800);
     } else if (evt.eventType === "activity") {
       focusRunning = true; focusSeconds = 0;
-      document.getElementById("activity-label").textContent = evt.title || "Р¤РѕРєСѓСЃ-С‚Р°Р№РјРµСЂ";
+      document.getElementById("activity-label").textContent = evt.title || "Фокус-таймер";
       setState("activity");
     } else if (evt.eventType === "expanded") {
       setState("expanded"); pollTelemetry();

@@ -15,47 +15,47 @@ export async function renderIcons(root) {
 
   root.innerHTML = `
     <div class="page-header">
-      <div class="page-kicker">ICON STUDIO вЂў WIN32 SHELL</div>
+      <div class="page-kicker">ICON STUDIO • WIN32 SHELL</div>
       <h1 class="page-title">Icon Studio</h1>
-      <p class="page-subtitle">РЎС‚РёР»РёР·Р°С†РёСЏ Рё СЂРµР°Р»СЊРЅР°СЏ Р·Р°РјРµРЅР° РёРєРѕРЅРѕРє СЏСЂР»С‹РєРѕРІ Windows (.lnk) СЃ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРёРј СЂРµР·РµСЂРІРЅС‹Рј РєРѕРїРёСЂРѕРІР°РЅРёРµРј.</p>
+      <p class="page-subtitle">Стилизация и реальная замена иконок ярлыков Windows (.lnk) с автоматическим резервным копированием.</p>
     </div>
 
     <div class="grid-2">
       <div class="card">
-        <div class="card-title">РџСЂРµРґРїСЂРѕСЃРјРѕС‚СЂ Рё СЌС„С„РµРєС‚С‹ (Icon Effects)</div>
+        <div class="card-title">Предпросмотр и эффекты (Icon Effects)</div>
         <div style="display:flex;justify-content:center;padding:18px 0;">
           <canvas id="icon-canvas" width="256" height="256" style="width:128px;height:128px;border-radius:16px;background:rgba(255,255,255,0.03);"></canvas>
         </div>
-        <div class="setting-row"><div class="setting-label">РЎРєСЂСѓРіР»РµРЅРёРµ</div><div class="range-wrap"><input type="range" id="fx-rad" min="0" max="110" value="48"/><span class="range-val" id="v-rad">48</span></div></div>
-        <div class="setting-row"><div class="setting-label">РўРµРЅСЊ</div><div class="range-wrap"><input type="range" id="fx-sh" min="0" max="40" value="18"/><span class="range-val" id="v-sh">18</span></div></div>
-        <div class="setting-row"><div class="setting-label">РЎРІРµС‡РµРЅРёРµ</div><div class="range-wrap"><input type="range" id="fx-gl" min="0" max="35" value="0"/><span class="range-val" id="v-gl">0</span></div></div>
-        <div class="setting-row"><div class="setting-label">РњР°С‚РѕРІРѕРµ СЃС‚РµРєР»Рѕ</div><label class="toggle"><input type="checkbox" id="fx-glass" checked/><span class="toggle-track"></span></label></div>
-        <div class="setting-row"><div class="setting-label">РњРµС‚Р°Р»Р»РёС‡РµСЃРєРёР№ Р±Р»РµСЃРє</div><label class="toggle"><input type="checkbox" id="fx-metal"/><span class="toggle-track"></span></label></div>
+        <div class="setting-row"><div class="setting-label">Скругление</div><div class="range-wrap"><input type="range" id="fx-rad" min="0" max="110" value="48"/><span class="range-val" id="v-rad">48</span></div></div>
+        <div class="setting-row"><div class="setting-label">Тень</div><div class="range-wrap"><input type="range" id="fx-sh" min="0" max="40" value="18"/><span class="range-val" id="v-sh">18</span></div></div>
+        <div class="setting-row"><div class="setting-label">Свечение</div><div class="range-wrap"><input type="range" id="fx-gl" min="0" max="35" value="0"/><span class="range-val" id="v-gl">0</span></div></div>
+        <div class="setting-row"><div class="setting-label">Матовое стекло</div><label class="toggle"><input type="checkbox" id="fx-glass" checked/><span class="toggle-track"></span></label></div>
+        <div class="setting-row"><div class="setting-label">Металлический блеск</div><label class="toggle"><input type="checkbox" id="fx-metal"/><span class="toggle-track"></span></label></div>
       </div>
 
       <div class="section-stack">
         <div class="card">
-          <div class="card-title">РСЃС‚РѕС‡РЅРёРє РёРєРѕРЅРєРё (Icon Replacement)</div>
+          <div class="card-title">Источник иконки (Icon Replacement)</div>
           <div class="btn-row" style="margin-bottom:12px;">
             ${PACKS.map(p => `<button class="btn pack-btn" data-pack="${p.id}">${p.name}</button>`).join("")}
           </div>
-          <button class="btn" id="btn-upload-img">Р—Р°РіСЂСѓР·РёС‚СЊ СЃРІРѕСЋ РєР°СЂС‚РёРЅРєСѓ (PNG/JPG)</button>
+          <button class="btn" id="btn-upload-img">Загрузить свою картинку (PNG/JPG)</button>
           <input type="file" id="file-icon-img" accept="image/*" style="display:none;" />
         </div>
 
         <div class="card">
-          <div class="card-title">Р’С‹Р±РѕСЂ СЏСЂР»С‹РєР° Windows (.lnk)</div>
-          <p class="card-desc" style="margin-bottom:10px;">РќР°Р№РґРµРЅРѕ СЏСЂР»С‹РєРѕРІ РЅР° Р Р°Р±РѕС‡РµРј СЃС‚РѕР»Рµ: ${shortcuts.length}</p>
+          <div class="card-title">Выбор ярлыка Windows (.lnk)</div>
+          <p class="card-desc" style="margin-bottom:10px;">Найдено ярлыков на Рабочем столе: ${shortcuts.length}</p>
           <select id="sel-shortcut" style="width:100%;margin-bottom:10px;">
-            ${shortcuts.map(s => `<option value="${s.path}">${s.name}${s.hasBackup ? " (РёР·РјРµРЅС‘РЅ)" : ""}</option>`).join("")}
+            ${shortcuts.map(s => `<option value="${s.path}">${s.name}${s.hasBackup ? " (изменён)" : ""}</option>`).join("")}
           </select>
           <div class="btn-row">
-            <button class="btn" id="btn-browse-lnk">Р’С‹Р±СЂР°С‚СЊ РґСЂСѓРіРѕР№ .lnk</button>
-            <button class="btn btn-primary" id="btn-apply-icon">РџСЂРёРјРµРЅРёС‚СЊ Рє СЏСЂР»С‹РєСѓ</button>
+            <button class="btn" id="btn-browse-lnk">Выбрать другой .lnk</button>
+            <button class="btn btn-primary" id="btn-apply-icon">Применить к ярлыку</button>
           </div>
           <div class="btn-row">
-            <button class="btn" id="btn-restore-one">Р’РѕСЃСЃС‚Р°РЅРѕРІРёС‚СЊ РІС‹Р±СЂР°РЅРЅС‹Р№</button>
-            <button class="btn" id="btn-restore-all">Р’РѕСЃСЃС‚Р°РЅРѕРІРёС‚СЊ РІСЃРµ</button>
+            <button class="btn" id="btn-restore-one">Восстановить выбранный</button>
+            <button class="btn" id="btn-restore-all">Восстановить все</button>
           </div>
         </div>
       </div>
@@ -165,26 +165,26 @@ export async function renderIcons(root) {
 
   root.querySelector("#btn-browse-lnk").onclick = async () => {
     const p = await api.browseShortcutFile();
-    if (p) { selectedShortcut = p; showToast("Р’С‹Р±СЂР°РЅ: " + p.split("\\").pop()); }
+    if (p) { selectedShortcut = p; showToast("Выбран: " + p.split("\\").pop()); }
   };
 
   root.querySelector("#btn-apply-icon").onclick = async () => {
-    if (!selectedShortcut) return showToast("РЎРЅР°С‡Р°Р»Р° РІС‹Р±РµСЂРёС‚Рµ СЏСЂР»С‹Рє .lnk");
+    if (!selectedShortcut) return showToast("Сначала выберите ярлык .lnk");
     try {
       const png = canvas.toDataURL("image/png");
       const res = await api.applyIconToShortcut(selectedShortcut, png);
       showToast(res);
-    } catch (err) { showToast("РћС€РёР±РєР°: " + err); }
+    } catch (err) { showToast("Ошибка: " + err); }
   };
 
   root.querySelector("#btn-restore-one").onclick = async () => {
     if (!selectedShortcut) return;
     try { showToast(await api.restoreIconForShortcut(selectedShortcut)); }
-    catch (err) { showToast("РћС€РёР±РєР°: " + err); }
+    catch (err) { showToast("Ошибка: " + err); }
   };
 
   root.querySelector("#btn-restore-all").onclick = async () => {
     try { showToast(await api.restoreAllShortcutIcons()); }
-    catch (err) { showToast("РћС€РёР±РєР°: " + err); }
+    catch (err) { showToast("Ошибка: " + err); }
   };
 }

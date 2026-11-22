@@ -8,7 +8,7 @@ export function renderWallpapers(root, { settings, updateSettings }) {
     const grid = root.querySelector("#wall-grid");
     const items = wp.items.filter(it => filter === "all" || (filter === "fav" && it.favorite));
     if (!items.length) {
-      grid.innerHTML = `<div class="card-desc">РљРѕР»Р»РµРєС†РёСЏ РїСѓСЃС‚Р°. РќР°Р¶РјРёС‚Рµ В«Р”РѕР±Р°РІРёС‚СЊ РёР·РѕР±СЂР°Р¶РµРЅРёСЏВ», С‡С‚РѕР±С‹ РІС‹Р±СЂР°С‚СЊ РѕР±РѕРё СЃ РєРѕРјРїСЊСЋС‚РµСЂР°.</div>`;
+      grid.innerHTML = `<div class="card-desc">Коллекция пуста. Нажмите «Добавить изображения», чтобы выбрать обои с компьютера.</div>`;
       return;
     }
     grid.innerHTML = "";
@@ -21,10 +21,10 @@ export function renderWallpapers(root, { settings, updateSettings }) {
         <div class="wall-meta">
           <div class="wall-name" title="${it.path}">${it.name}</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button class="btn btn-primary" data-set="${it.path}" style="padding:5px 9px;font-size:11px;">РЈСЃС‚Р°РЅРѕРІРёС‚СЊ</button>
-            <button class="btn" data-fav="${it.id}" style="padding:5px 8px;font-size:11px;">${it.favorite ? "в…" : "в†"}</button>
-            <button class="btn" data-pl="${it.path}" style="padding:5px 8px;font-size:11px;">${inPl ? "Р’ РїР»РµР№Р»РёСЃС‚Рµ" : "+ РџР»РµР№Р»РёСЃС‚"}</button>
-            <button class="btn" data-del="${it.id}" style="padding:5px 8px;font-size:11px;">вњ•</button>
+            <button class="btn btn-primary" data-set="${it.path}" style="padding:5px 9px;font-size:11px;">Установить</button>
+            <button class="btn" data-fav="${it.id}" style="padding:5px 8px;font-size:11px;">${it.favorite ? "★" : "☆"}</button>
+            <button class="btn" data-pl="${it.path}" style="padding:5px 8px;font-size:11px;">${inPl ? "В плейлисте" : "+ Плейлист"}</button>
+            <button class="btn" data-del="${it.id}" style="padding:5px 8px;font-size:11px;">✕</button>
           </div>
         </div>
       `;
@@ -39,8 +39,8 @@ export function renderWallpapers(root, { settings, updateSettings }) {
       try {
         await api.applyWallpaperNow(b.dataset.set, wp.fitMode);
         await updateSettings(s => s.wallpaper.activePath = b.dataset.set);
-        showToast("РћР±РѕРё СѓСЃС‚Р°РЅРѕРІР»РµРЅС‹ РЅР° СЂР°Р±РѕС‡РёР№ СЃС‚РѕР»");
-      } catch (err) { showToast("РћС€РёР±РєР°: " + err); }
+        showToast("Обои установлены на рабочий стол");
+      } catch (err) { showToast("Ошибка: " + err); }
     });
     grid.querySelectorAll("[data-fav]").forEach(b => b.onclick = async () => {
       await updateSettings(s => {
@@ -68,36 +68,36 @@ export function renderWallpapers(root, { settings, updateSettings }) {
 
   root.innerHTML = `
     <div class="page-header">
-      <div class="page-kicker">WALLPAPER STUDIO вЂў DESKTOP ENGINE</div>
+      <div class="page-kicker">WALLPAPER STUDIO • DESKTOP ENGINE</div>
       <h1 class="page-title">Wallpaper Studio</h1>
-      <p class="page-subtitle">РЈРїСЂР°РІР»РµРЅРёРµ РєРѕР»Р»РµРєС†РёСЏРјРё РѕР±РѕРµРІ, РїРѕРґРіРѕРЅРєРѕР№ РїРѕРґ СЌРєСЂР°РЅ Рё Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРѕР№ СЃРјРµРЅРѕР№ РїРѕ РїР»РµР№Р»РёСЃС‚Сѓ.</p>
+      <p class="page-subtitle">Управление коллекциями обоев, подгонкой под экран и автоматической сменой по плейлисту.</p>
     </div>
 
     <div class="section-stack">
       <div class="card">
         <div class="setting-row">
-          <div><div class="setting-label">Р РµР¶РёРј РїРѕРґРіРѕРЅРєРё РїРѕРґ СЌРєСЂР°РЅ</div></div>
+          <div><div class="setting-label">Режим подгонки под экран</div></div>
           <div class="segmented" id="wp-fit">
-            ${[["fill","Р—Р°РїРѕР»РЅРµРЅРёРµ"],["fit","Р’РїРёСЃР°С‚СЊ"],["stretch","Р Р°СЃС‚СЏРЅСѓС‚СЊ"],["center","РџРѕ С†РµРЅС‚СЂСѓ"]].map(([v,l]) =>
+            ${[["fill","Заполнение"],["fit","Вписать"],["stretch","Растянуть"],["center","По центру"]].map(([v,l]) =>
               `<button class="seg-btn ${wp.fitMode === v ? "active" : ""}" data-val="${v}">${l}</button>`
             ).join("")}
           </div>
         </div>
         <div class="setting-row">
           <div>
-            <div class="setting-label">РђРІС‚РѕРјР°С‚РёС‡РµСЃРєР°СЏ СЃРјРµРЅР° РѕР±РѕРµРІ</div>
-            <div class="setting-hint">Р’ РїР»РµР№Р»РёСЃС‚Рµ РёР·РѕР±СЂР°Р¶РµРЅРёР№: ${wp.slideshowPlaylist.length}</div>
+            <div class="setting-label">Автоматическая смена обоев</div>
+            <div class="setting-hint">В плейлисте изображений: ${wp.slideshowPlaylist.length}</div>
           </div>
           <div style="display:flex;align-items:center;gap:10px;">
-            <input type="number" id="wp-int" min="10" value="${wp.slideshowIntervalSec}" style="width:80px;" title="РРЅС‚РµСЂРІР°Р» (СЃРµРє)"/>
-            <span style="font-size:12px;color:var(--text-muted);">СЃРµРє</span>
+            <input type="number" id="wp-int" min="10" value="${wp.slideshowIntervalSec}" style="width:80px;" title="Интервал (сек)"/>
+            <span style="font-size:12px;color:var(--text-muted);">сек</span>
             <label class="toggle"><input type="checkbox" id="wp-slide" ${wp.slideshowEnabled ? "checked" : ""}/><span class="toggle-track"></span></label>
           </div>
         </div>
         <div class="btn-row">
-          <button class="btn btn-primary" id="btn-add-wp">Р”РѕР±Р°РІРёС‚СЊ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ СЃ РџРљ</button>
-          <button class="btn" id="btn-f-all">Р’СЃРµ (${wp.items.length})</button>
-          <button class="btn" id="btn-f-fav">РР·Р±СЂР°РЅРЅРѕРµ</button>
+          <button class="btn btn-primary" id="btn-add-wp">Добавить изображения с ПК</button>
+          <button class="btn" id="btn-f-all">Все (${wp.items.length})</button>
+          <button class="btn" id="btn-f-fav">Избранное</button>
         </div>
       </div>
 
