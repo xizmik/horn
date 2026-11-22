@@ -3,21 +3,27 @@ const { listen } = window.__TAURI__.event;
 const { getCurrentWindow } = window.__TAURI__.window;
 
 export const api = {
+  getBrandLogo: () => invoke("get_brand_logo"),
   getSettings: () => invoke("get_settings"),
   saveSettings: (settings) => invoke("save_settings", { settings }),
   updateIslandHitbox: (rect) => invoke("update_island_hitbox", { x: rect.x, y: rect.y, width: rect.width, height: rect.height }),
-  triggerIslandEvent: (eventType, title, subtitle) => invoke("trigger_island_event", { eventType, title, subtitle }),
+  triggerIslandEvent: (eventType, title, subtitle, appName = "HØRN") =>
+    invoke("trigger_island_event", { eventType, appName, title, subtitle }),
   getSystemTelemetry: () => invoke("get_system_telemetry"),
+  getMediaInfo: () => invoke("get_media_info"),
+  mediaControl: (action) => invoke("media_control", { action }),
   getOsCompatibility: () => invoke("get_os_compatibility"),
   applyTaskbarSettings: (settings) => invoke("apply_taskbar_settings", { settings }),
   restoreTaskbarDefaults: () => invoke("restore_taskbar_defaults"),
   pickWallpapers: () => invoke("pick_wallpapers"),
   readImageDataUrl: (path) => invoke("read_image_data_url", { path }),
   applyWallpaperNow: (path, fitMode) => invoke("apply_wallpaper_now", { path, fitMode }),
-  getDesktopShortcuts: () => invoke("get_desktop_shortcuts"),
+  getIconTargets: () => invoke("get_icon_targets"),
   browseShortcutFile: () => invoke("browse_shortcut_file"),
-  applyIconToShortcut: (shortcutPath, pngBase64) => invoke("apply_icon_to_shortcut", { shortcutPath, pngBase64 }),
-  restoreIconForShortcut: (shortcutPath) => invoke("restore_icon_for_shortcut", { shortcutPath }),
+  applyIconToTarget: (targetPath, targetKind, pngBase64) =>
+    invoke("apply_icon_to_target_cmd", { targetPath, targetKind, pngBase64 }),
+  restoreTargetIcon: (targetPath, targetKind) =>
+    invoke("restore_target_icon_cmd", { targetPath, targetKind }),
   restoreAllShortcutIcons: () => invoke("restore_all_shortcut_icons"),
   getConfigFilePath: () => invoke("get_config_file_path"),
   showMainWindow: () => invoke("show_main_window"),

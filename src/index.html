@@ -10,7 +10,10 @@
 <body>
   <div class="app-shell">
     <header class="titlebar" data-tauri-drag-region>
-      <div class="titlebar-label">HØRN Desktop Platform • v0.2</div>
+      <div style="display:flex;align-items:center;gap:8px;pointer-events:none;">
+        <img data-brand-logo src="assets/app-icon.png" alt="HØRN" style="width:16px;height:16px;border-radius:4px;object-fit:contain;" />
+        <div class="titlebar-label">HØRN Desktop Platform • v0.2</div>
+      </div>
       <div class="window-controls">
         <button class="win-btn" id="btn-min" title="Свернуть">
           <svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 6h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
@@ -28,7 +31,7 @@
       <aside class="sidebar">
         <div>
           <div class="sidebar-brand">
-            <img src="assets/app-icon.png" alt="HØRN" class="sidebar-logo" />
+            <img data-brand-logo src="assets/app-icon.png" alt="HØRN" class="sidebar-logo" />
             <div>
               <div class="brand-name">HØRN</div>
               <div class="brand-sub">v0.2 STUDIO</div>

@@ -1,4 +1,5 @@
 import { api, showToast } from "./api.js";
+import { hydrateBrandLogos } from "./logo.js";
 import { renderHome } from "./pages/home.js";
 import { renderIslandSettings } from "./pages/island-settings.js";
 import { renderIcons } from "./pages/icons.js";
@@ -9,7 +10,7 @@ import { renderSettings } from "./pages/settings.js";
 
 const NAV_ITEMS = [
   { id: "home", label: "Home", badge: null, render: renderHome },
-  { id: "island", label: "Dynamic Island", badge: "LIVE", render: renderIslandSettings },
+  { id: "island", label: "Island Studio", badge: "LIVE", render: renderIslandSettings },
   { id: "icons", label: "Icon Studio", badge: "NEW", render: renderIcons },
   { id: "taskbar", label: "Taskbar Studio", badge: "NEW", render: renderTaskbar },
   { id: "wallpapers", label: "Wallpaper Studio", badge: "NEW", render: renderWallpapers },
@@ -24,7 +25,7 @@ function updateSidebarStatus() {
   const text = document.getElementById("island-status-text");
   const enabled = state.settings?.island?.enabled;
   dot.style.opacity = enabled ? "1" : "0.25";
-  text.textContent = enabled ? "Dynamic Island активен" : "Dynamic Island отключён";
+  text.textContent = enabled ? `Island: ${state.settings.island.activeMode || "system"}` : "Dynamic Island отключён";
 }
 
 function renderNav() {
@@ -45,11 +46,8 @@ async function updateSettings(updater) {
   updater(next);
   state.settings = next;
   updateSidebarStatus();
-  try {
-    await api.saveSettings(next);
-  } catch (err) {
-    showToast("Ошибка сохранения: " + err);
-  }
+  try { await api.saveSettings(next); }
+  catch (err) { showToast("Ошибка сохранения: " + err); }
 }
 
 function navigate(pageId) {
@@ -78,6 +76,7 @@ function bindWindowControls() {
 
 async function bootstrap() {
   bindWindowControls();
+  await hydrateBrandLogos();
   state.settings = await api.getSettings();
   state.osCompat = await api.getOsCompatibility();
   document.getElementById("os-badge").textContent = state.osCompat.osLabel;

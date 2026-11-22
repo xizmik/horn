@@ -12,71 +12,44 @@
       <!-- Compact -->
       <div class="island-view visible" id="view-compact">
         <div class="compact-left">
-          <img src="assets/app-icon.png" alt="HØRN" class="island-logo-sm" />
-          <span class="compact-brand">HØRN</span>
+          <img data-brand-logo src="assets/app-icon.png" alt="HØRN" class="island-logo-sm" />
+          <span class="compact-brand" id="compact-summary">HØRN</span>
         </div>
         <span class="compact-clock" id="compact-clock">00:00</span>
       </div>
 
-      <!-- Activity -->
+      <!-- Activity (Focus Timer / Music Live) -->
       <div class="island-view" id="view-activity">
         <div class="compact-left">
           <div class="activity-bars"><span></span><span></span><span></span><span></span></div>
           <span class="activity-meta" id="activity-label">Фокус-таймер</span>
         </div>
-        <span class="activity-meta" id="activity-value">00:00</span>
+        <span class="activity-meta" id="activity-value">25:00</span>
       </div>
 
-      <!-- Notification -->
+      <!-- Temporary Notification Overlay -->
       <div class="island-view notif-view" id="view-notification">
-        <img src="assets/app-icon.png" alt="HØRN" class="notif-logo" />
-        <div>
-          <div class="notif-title" id="notif-title">HØRN</div>
+        <img data-brand-logo src="assets/app-icon.png" alt="HØRN" class="notif-logo" />
+        <div style="min-width:0;flex:1;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="notif-title" id="notif-title">HØRN</div>
+            <span class="notif-app" id="notif-app">System</span>
+          </div>
           <div class="notif-sub" id="notif-sub">Системное уведомление</div>
         </div>
       </div>
 
-      <!-- Expanded -->
+      <!-- Expanded Dynamic Mode Host -->
       <div class="island-view expanded-view" id="view-expanded">
         <div class="exp-top">
           <div class="compact-left">
-            <img src="assets/app-icon.png" alt="HØRN" class="island-logo-sm" />
-            <span class="exp-title">HØRN • LIVE</span>
+            <img data-brand-logo src="assets/app-icon.png" alt="HØRN" class="island-logo-sm" />
+            <span class="exp-title" id="exp-mode-title">SYSTEM MONITOR</span>
           </div>
-          <div style="text-align:right;">
-            <div class="exp-time" id="expanded-clock">00:00:00</div>
-            <div class="exp-date" id="expanded-date"></div>
-          </div>
+          <div class="mode-pills" id="island-mode-switcher"></div>
         </div>
 
-        <div class="exp-metrics" id="exp-metrics-grid">
-          <div class="metric-box" id="box-cpu">
-            <div class="metric-label">CPU</div>
-            <div class="metric-value" id="metric-cpu">0%</div>
-            <div class="metric-bar"><div class="metric-fill" id="bar-cpu"></div></div>
-          </div>
-          <div class="metric-box" id="box-ram">
-            <div class="metric-label">RAM</div>
-            <div class="metric-value" id="metric-ram">0 GB</div>
-            <div class="metric-bar"><div class="metric-fill" id="bar-ram"></div></div>
-          </div>
-          <div class="metric-box" id="box-gpu">
-            <div class="metric-label">GPU</div>
-            <div class="metric-value" id="metric-gpu">N/A</div>
-          </div>
-          <div class="metric-box" id="box-temp">
-            <div class="metric-label">TEMP</div>
-            <div class="metric-value" id="metric-temp">N/A</div>
-          </div>
-          <div class="metric-box" id="box-bat">
-            <div class="metric-label">BATTERY</div>
-            <div class="metric-value" id="metric-bat">AC</div>
-          </div>
-          <div class="metric-box" id="box-net">
-            <div class="metric-label">NETWORK</div>
-            <div class="metric-value" id="metric-net" style="font-size:12px;">0 / 0 KB/s</div>
-          </div>
-        </div>
+        <div class="exp-body" id="exp-body"></div>
 
         <div class="exp-actions">
           <button class="exp-btn" id="btn-toggle-focus">Фокус</button>
